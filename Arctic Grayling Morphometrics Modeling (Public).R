@@ -1,18 +1,18 @@
 ################################################################################
 # Validating Morphometrics as a non-lethal tool to determine Arctic Grayling Sex 
 ####################### Author: William Samuel #################################
-########### Project Collaborators: Lauren Yancy, Elizabeth Hinkle ##############
+###### Project Collaborators: Lauren Yancy, Elizabeth Hinkle, Jeff Falke #######
 ################################################################################
 
+
+#If you only want to use this code to predict, that begins on line 1307
 
 
 
 library(tidyverse)  #general data manipulation
 library(ggplot2)    #plotting
 library(cowplot)    #for cleaner ggplots
-library(plotly)     #3D plots
 library(patchwork)  #Panel plots
-library(ggcorrplot) #to make a correlation plot
 library(MuMIn)      #To Dredge the model choices
 library(AICcmodavg) #for model statistics
 library(rcompanion) #for pseudo R-squared
@@ -20,83 +20,12 @@ library(DAAG)       #Evaluating the model
 
 
 
-setwd("C:/Users/wtsamuel/Desktop/Arctic-Grayling-Morphometrics-Public")
+setwd("C:/Users/npwil/OneDrive/Desktop/School/Grad School/Side Quests/Grayling morphometrics project/Arctic-Grayling-Morphometrics-Public")
+
 
 #full.dat <- read.csv("Combined_fish_sample_data V4.csv")
 
-full.dat <- read.csv("full.dat.AG.Morphometrics.csv")
-
-
-
-# Data manipulation -------------------------------------------------------
-
-#THIS IS ALL ALREADY DONE IN THE DATASET YOU READ IN, SO IGNORE THIS! 
-#STANDARDIZING MORPHOMETRICS BY FORK LENGTH
-
-View(full.dat)
-
-#Assign a binomial variable (male vs female)
-full.dat <- full.dat %>%
-  mutate(sex_num = ifelse(Sex == "M", 0, 1)) #Males = 0, Females = 1
-
-full.dat$Sex[full.dat$Sex==""] <- NA
-
-
-#Standardize by Fork Length
-full.dat <- full.dat %>%
-  mutate(a = (horizontal_eye_diameter/fork_length)) %>%
-  mutate(b = (head_depth_through_eye/fork_length)) %>% 
-  mutate(c = (postorbital_length/fork_length)) %>% 
-  mutate(d = (head_length/fork_length)) %>% 
-  mutate(e = (maximum_body_depth/fork_length)) %>%  
-  mutate(f = (minimum_caudal_peduncle_depth/fork_length)) %>% 
-  mutate(g = (predorsal_length/fork_length)) %>% 
-  mutate(h = (postdorsal_length/fork_length)) %>%  
-  mutate(i = (pect.pelvic_distance/fork_length)) %>%  #need to replace these periods with spaces in the original datasheet VV
-  mutate(j = (pelvic.anal_distance/fork_length)) %>%  
-  mutate(k = (preanal_length/fork_length)) %>% 
-  mutate(l = (dorsal_fin_base_length/fork_length)) %>% 
-  mutate(m = (anterior_dorsal_height/fork_length)) %>%  
-  mutate(n = (posterior_dorsal_height/fork_length)) %>%  
-  mutate(o = (anal_fin_base_length/fork_length)) %>% 
-  mutate(p = (anal_fin_height/fork_length)) %>%  
-  mutate(q = (pectoral_fin_length/fork_length)) %>%  
-  mutate(r = (pelvic_fin_length/fork_length)) %>%  
-  mutate(s = (adipose_fin_base/fork_length)) %>% 
-  mutate(t = (adipose_height/fork_length)) %>%  
-  mutate(u = (dorsal_to_adipose/fork_length)) 
-
-View(full.dat)
-
-
-full.dat <- full.dat %>%
-  mutate("horizontal_eye_diameter_FL_a" = (horizontal_eye_diameter/fork_length)) %>%
-  mutate("head_depth_through_eye_FL_b" = (head_depth_through_eye/fork_length)) %>% 
-  mutate("postorbital_length_FL_c" = (postorbital_length/fork_length)) %>% 
-  mutate("head_length_FL_d" = (head_length/fork_length)) %>% 
-  mutate("maximum_body_depth_FL_e" = (maximum_body_depth/fork_length)) %>%  
-  mutate("minimum_caudal_peduncle_depth_FL_f" = (minimum_caudal_peduncle_depth/fork_length)) %>% 
-  mutate("predorsal_length_FL_g" = (predorsal_length/fork_length)) %>% 
-  mutate("postdorsal_length_FL_h" = (postdorsal_length/fork_length)) %>%  
-  mutate("pect.pelvic_distance_FL_i" = (pect.pelvic_distance/fork_length)) %>%  
-  mutate("pelvic.anal_distance_FL_j" = (pelvic.anal_distance/fork_length)) %>%  
-  mutate("preanal_length_FL_k" = (preanal_length/fork_length)) %>% 
-  mutate("dorsal_fin_base_length_FL_l" = (dorsal_fin_base_length/fork_length)) %>% 
-  mutate("anterior_dorsal_height_FL_m" = (anterior_dorsal_height/fork_length)) %>%  
-  mutate("posterior_dorsal_height_FL_n" = (posterior_dorsal_height/fork_length)) %>%  
-  mutate("anal_fin_base_length_FL_o" = (anal_fin_base_length/fork_length)) %>% 
-  mutate("anal_fin_height_FL_p" = (anal_fin_height/fork_length)) %>%  
-  mutate("pectoral_fin_length_FL_q" = (pectoral_fin_length/fork_length)) %>%  
-  mutate("pelvic_fin_length_FL_r" = (pelvic_fin_length/fork_length)) %>%  
-  mutate("adipose_fin_base_FL_s" = (adipose_fin_base/fork_length)) %>% 
-  mutate("adipose_height_FL_t" = (adipose_height/fork_length)) %>%  
-  mutate("dorsal_to_adipose_FL_u" = (dorsal_to_adipose/fork_length)) 
-
-View(full.dat)
-
-write.csv(full.dat, file = "full.dat.AG.Morphometrics.csv")
-
-
+full.dat <- read.csv("full.dat.edited.csv")
 
 
 
@@ -125,19 +54,6 @@ scale_y_continuous(expand=c(0,0),limits=c(0,20), breaks = c(5, 10, 15, 20))
 
 
 
-M.dat <- full.dat %>% 
-  filter(Sex == "M")
-F.dat <- full.dat %>% 
-  filter(Sex == "F")
-
-
-ggplot()+
-  geom_histogram(data=M.dat, aes(x=fork_length), fill = "darkgray", color = "darkgray", binwidth = 20)+
-  geom_histogram(data=F.dat, aes(x=fork_length), fill = "lightgray", color = "darkgray", alpha = 0.7, binwidth = 20)+
-  theme_cowplot()+
-  labs(#title = "Fork Length of Sample", 
-    x = "Fork Length (mm)", y = "Count")+
-  scale_y_continuous(expand=c(0,0),limits=c(0,13), breaks = c(5, 10, 15))
 
 
 fl_hist <- ggplot(data=full.dat, aes(x=fork_length, fill = Sex))+
@@ -178,12 +94,15 @@ m <- full.dat %>% filter(sex_num == 0)
 
 f <- full.dat %>% filter(sex_num == 1)
 
+#Testing if there is a significant difference between the dorsal fin length 
+#(standardized by fork length) of males and females, and there is!
 t.test(x = m$n, y = f$n, paired = F)
 
 #T = 6.379, df = 66.486, p < 0.00001
 
 
 
+#Showing the difference between male and female dorsal length (standardized by fork length)
 
 fl_n <- ggplot(data=full.dat, aes(x=n, fill = Sex))+
   geom_histogram(color = "black", alpha = 0.8)+ #fill = "lightgray",
@@ -226,98 +145,6 @@ ggsave(plot= fl_n_density,
        units = "in")
 
 
-
-# Exploratory Analysis ----------------------------------------------------------
-
-
-#which ones are significant on their own?
-sexbinom_a <- glm(sex_num ~ a, data = full.dat, family = "binomial")
-summary(sexbinom_a) #not significant 
-
-sexbinom_b <- glm(sex_num ~ b, data = full.dat, family = "binomial")
-summary(sexbinom_b) #Not significant 
-
-sexbinom_c <- glm(sex_num ~ c, data = full.dat, family = "binomial") 
-summary(sexbinom_c) #SIGNIFICANT p = 0.00123
-
-sexbinom_d <- glm(sex_num ~ d, data = full.dat, family = "binomial")
-summary(sexbinom_d) #Significant p = 0.00603
-
-sexbinom_e <- glm(sex_num ~ e, data = full.dat, family = "binomial")
-summary(sexbinom_e) #not significant
-
-sexbinom_f <- glm(sex_num ~ f, data = full.dat, family = "binomial")
-summary(sexbinom_f) #not significant
-
-sexbinom_g <- glm(sex_num ~ g, data = full.dat, family = "binomial")
-summary(sexbinom_g) #not Significant 
-
-sexbinom_h <- glm(sex_num ~ h, data = full.dat, family = "binomial")
-summary(sexbinom_h) #not significant p = 0.0751
-
-sexbinom_i <- glm(sex_num ~ i, data = full.dat, family = "binomial")
-summary(sexbinom_i) #Not significant
-
-sexbinom_j <- glm(sex_num ~ j, data = full.dat, family = "binomial")
-summary(sexbinom_j) #not Significant p = 0.220
-
-sexbinom_k <- glm(sex_num ~ k, data = full.dat, family = "binomial")
-summary(sexbinom_k) #not significant 
-
-sexbinom_l <- glm(sex_num ~ l, data = full.dat, family = "binomial")
-summary(sexbinom_l) #significant p = 0.00543
-
-sexbinom_m <- glm(sex_num ~ m, data = full.dat, family = "binomial")
-summary(sexbinom_m) #not significant
-
-sexbinom_n <- glm(sex_num ~ n, data = full.dat, family = "binomial")
-summary(sexbinom_n) #not significant p = 0.0000072
-
-sexbinom_o <- glm(sex_num ~ o, data = full.dat, family = "binomial")
-summary(sexbinom_o) #not significant p = 0.0704
-
-sexbinom_p <- glm(sex_num ~ p, data = full.dat, family = "binomial")
-summary(sexbinom_p) #not significant 
-
-sexbinom_q <- glm(sex_num ~ q, data = full.dat, family = "binomial")
-summary(sexbinom_q) #not significant p = 0.000551
-
-sexbinom_r <- glm(sex_num ~ r, data = full.dat, family = "binomial")
-summary(sexbinom_r) # significant p = 0.000734
-
-sexbinom_s <- glm(sex_num ~ s, data = full.dat, family = "binomial")
-summary(sexbinom_s) #significant p = 0.0545
-
-sexbinom_t <- glm(sex_num ~ t, data = full.dat, family = "binomial") 
-summary(sexbinom_t) #not significant 
-
-sexbinom_u <- glm(sex_num ~ u, data = full.dat, family = "binomial")
-summary(sexbinom_u) #Significant p = 0.0000187
-
-sexbinom_v <- glm(sex_num ~ v, data = full.dat, family = "binomial")
-summary(sexbinom_v) #significant 0.00994
-
-
-
-#Results from the single models
-#c (Postobital length, p = 0.00123)
-#d (Head length, p = 0.00603)
-#h (Postdorsal length, p = 0.0751) *** not quite significant
-#m (dorsal_fin_base_length, p = 0.00543)
-#o (Posterior Dorsal height, p = 0.0000072)
-#p (anal fin base length p = 0.0704) *** not quite significant
-#q (anal fin height, p = 0.0159) *** not quite significant
-#r (pectoral fin length, p = 0.000551)
-#s (pelvic fin length, p = 0.000734)
-#t (adipose fin base, p = 0.0545)
-#v (Dorsal end length, p = 0.0000187)
-#w (Dorsal to adipose, p = 0.00994)
-
-
-
-sexbinom_2 <- glm(sex_num ~ c+d+h+m+o+p+q+r+s+t+v+w, data = full.dat, family = "binomial")
-summary(sexbinom_2)
-#h, o, s are signficant, Postdorsal length, Posterior Dorsal height, and pelvic fin length
 
 
 
@@ -437,8 +264,8 @@ full.dat <- full.dat %>%
 
 
 #Final Global Model (without colinear predictors, g and K)
-m.global <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
-summary(m.global)
+m.global <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = full.dat, family = "binomial")
+summary(m.global)         
 
 nagelkerke(m.global)
 accuracy(list(m.global))
@@ -454,12 +281,13 @@ options(na.action = "na.fail")
 m.global <- dredge(m.global, trace = 2, evaluate = TRUE)
 options(na.action = "na.omit")
 #Look at the results from this dredge model selection and use it to develop the next model
+#This will take a while to run since we have so many parameters. 
 
 
 
 
 
-m.dredge <- glm(sex_num ~ a+e+j+q+r+s+u, data = full.dat, family = "binomial")
+m.dredge <- glm(sex_num ~ a+e+j+q+r+s+v, data = full.dat, family = "binomial")
 summary(m.dredge)
 
 nagelkerke(m.dredge)
@@ -474,7 +302,7 @@ accuracy(list(m.dredge))
 
 
 #Just fins
-m.fins.only <- glm(sex_num ~ l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
+m.fins.only <- glm(sex_num ~ l+m+n+o+p+q+r+s+t+v, data = full.dat, family = "binomial")
 summary(m.fins.only)
 
 nagelkerke(m.fins.only)
@@ -525,7 +353,7 @@ grayling_dat_250 <- full.dat %>%
 str(grayling_dat_250)
 summary(grayling_dat_250$fork_measured)
 
-m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_250, family = "binomial")
+m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = grayling_dat_250, family = "binomial")
 summary(m.250)
 
 nagelkerke(m.250)
@@ -544,7 +372,7 @@ grayling_dat_300 <- full.dat %>%
 str(grayling_dat_300)
 summary(grayling_dat_300$fork_measured)
 
-m.300 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_300, family = "binomial")
+m.300 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = grayling_dat_300, family = "binomial")
 summary(m.300)
 
 nagelkerke(m.300)
@@ -575,230 +403,20 @@ aictab(cand.set = models, modnames = mod.names)
 
 
 # Model Evaluation --------------------------------------------------------
-### Leave One Out Cross Validation _____________________________________________
 
 
-#RUNNING INTO ISSUES WITH THIS SECTION
-#For some reason this public code is calculating differently than the original R script
 
+###Some model checks
 
-#full.dat <- read.csv("full.dat.AG.Morphometrics.csv") #97 obs
-
-#Change the datasets for the three different levels of testing data
-#full.dat <- full.dat %>% filter(fork_length >249) #79 obs
-full.dat <- full.dat %>% filter(fork_length >299)  #66 obs
-
-colnames(full.dat)[apply(full.dat, 2, anyNA)]
-
-
-#Replace NAs with the mean of the parameter
-full.dat <- full.dat %>% 
-  mutate(s = ifelse(is.na(s), mean(s, na.rm = TRUE), s)) %>% 
-  mutate(o = ifelse(is.na(o), mean(o, na.rm = TRUE), o)) %>% 
-  mutate(t = ifelse(is.na(t), mean(t, na.rm = TRUE), t)) 
-
-
-
-global_pred <- vector()
-
-for(i in 1:66){
-  validate.dat <- full.dat[i,] #Single out one value
-  training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.global <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = training.dat, family = "binomial")
-  global_pred[i] <- predict(m.global, newdata = validate.dat, type = "response")
-  
-}
-
-global_pred #Predicted probabilities of it being male/female
-
-
-
-
-dredge_pred <- vector()
-
-for(i in 1:66){
-  validate.dat <- full.dat[i,] #Single out one value
-  training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.dredge <- glm(sex_num ~ a+e+j+q+r+s+u, data = training.dat, family = "binomial")
-  dredge_pred[i] <- predict(m.dredge, newdata = validate.dat, type = "response")
-  
-}
-
-
-
-fins_only_pred <- vector()
-
-for(i in 1:66){
-  validate.dat <- full.dat[i,] #Single out one value
-  training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.fins.only <- glm(sex_num ~ l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
-  fins_only_pred[i] <- predict(m.fins.only, newdata = validate.dat, type = "response")
-  
-}
-
-
-dorsal_all_pred <- vector()
-
-for(i in 1:66){
-  validate.dat <- full.dat[i,] #Single out one value
-  training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.dorsal.all <- glm(sex_num ~ h+l+m+n #g+v
-                      , data = full.dat, family = "binomial")
-  dorsal_all_pred[i] <- predict(m.dorsal.all, newdata = validate.dat, type = "response")
-  
-}
-
-
-dorsal_length_pred <- vector()
-
-for(i in 1:66){
-  validate.dat <- full.dat[i,] #Single out one value
-  training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.dorsal.length <- glm(sex_num ~ n
-                         , data = full.dat, family = "binomial")
-  dorsal_length_pred[i] <- predict(m.dorsal.length, newdata = validate.dat, type = "response")
-  
-}
-
-
-
-
-grayling_dat_250 <- full.dat %>% 
-  filter(fork_length >249)
-
-M250_pred <- vector()
-
-for(i in 1:66){
-  validate.dat <- full.dat[i,] #Single out one value
-  training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_250, family = "binomial")
-  M250_pred[i] <- predict(m.250, newdata = validate.dat, type = "response")
-  
-}
-
-
-
-
-grayling_dat_300 <- full.dat %>% 
-  filter(fork_length >299)
-
-
-M300_pred <- vector()
-
-for(i in 1:66){
-  validate.dat <- full.dat[i,] #Single out one value
-  training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.300 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_300, family = "binomial")
-  M300_pred[i] <- predict(m.300, newdata = validate.dat, type = "response")
-  
-}
-
-
-full.dat <- cbind(full.dat, global_pred, dredge_pred, fins_only_pred, dorsal_all_pred, dorsal_length_pred, M250_pred, M300_pred) 
-
-
-
-
-#Get missclassifications
-full.dat <- full.dat %>% 
-  mutate(global_pred = ifelse(global_pred>0.5, 1, 0)) %>% 
-  mutate("global_pred_wrong" = ifelse(global_pred == sex_num, 0, 1)) %>% 
-  
-  mutate(dredge_pred = ifelse(dredge_pred>0.5, 1, 0)) %>% 
-  mutate("dredge_pred_wrong" = ifelse(dredge_pred == sex_num, 0, 1)) %>% 
-  
-  mutate(fins_only_pred = ifelse(fins_only_pred>0.5, 1, 0)) %>% 
-  mutate("fins_only_pred_wrong" = ifelse(fins_only_pred == sex_num, 0, 1)) %>% 
-  
-  mutate(dorsal_all_pred = ifelse(dorsal_all_pred>0.5, 1, 0)) %>% 
-  mutate("dorsal_all_pred_wrong" = ifelse(dorsal_all_pred == sex_num, 0, 1)) %>%
-  
-  mutate(dorsal_length_pred = ifelse(dorsal_length_pred>0.5, 1, 0)) %>% 
-  mutate("dorsal_length_pred_wrong" = ifelse(dorsal_length_pred == sex_num, 0, 1)) %>% 
-  
-  mutate(M250_pred = ifelse(M250_pred>0.5, 1, 0)) %>% 
-  mutate("M250_pred_wrong" = ifelse(M250_pred == sex_num, 0, 1)) %>% 
-  
-  mutate(M300_pred = ifelse(M300_pred>0.5, 1, 0)) %>% 
-  mutate("M300_pred_wrong" = ifelse(M300_pred == sex_num, 0, 1)) 
-
-
-
-
-
-percent_calc <- function(x) {
-  
-  percent_wrong <- (((sum(x))/(length(x)))*100)
-  
-  return(percent_wrong)
-  
-  
-} 
-
-
-#Calculate the misclassification rate
-percent_global <- percent_calc(full.dat$global_pred_wrong)
-
-percent_dredge <- percent_calc(full.dat$dredge_pred_wrong)
-
-percent_fins <- percent_calc(full.dat$fins_only_pred_wrong)
-
-percent_dorsal_all <- percent_calc(full.dat$dorsal_all_pred_wrong)
-
-percent_dorsal_length <- percent_calc(full.dat$dorsal_length_pred_wrong)
-
-percent_M250 <- percent_calc(full.dat$M250_pred_wrong)
-
-percent_M300 <- percent_calc(full.dat$M300_pred_wrong)
-
-
-print(cbind(percent_global, percent_dredge, percent_fins, percent_dorsal_all, percent_dorsal_length, percent_M250, percent_M300))
-
-
-#Full.dat
-#percent_global percent_reduced percent_fins percent_dorsal_all 
-28.86598            19.58763      16.49485       15.46392           
-#percent_dorsal_length  percent_M250     percent_M300
-18.5567                      6.19           12.37
-
-
-#Fish >250
-#percent_global percent_dredge percent_noVIF percent_reduced percent_fins percent_dorsal_all 
-25.31646           0           5.063291        5.063291     7.59437           15.18987              
-#percent_dorsal_length  percent_M250   percent_M300
-15.18987                 0            7.594937
-
-
-
-#Fish >300
-#percent_global percent_dredge percent_noVIF percent_reduced percent_fins  
-27.27273              0      7.575758        7.575758     6.060606                         
-#percent_dorsal_all  #percent_dorsal_length   percent_M250      percent_M300
-10.60606               10.60606                    0               0
-
-
-#Predictions improve as fork length increases........
-
-
-
-
-
-
-
-
-
-m0.cv <- cv.binary(m.global) # remains at 0.708
+#this is a 10 fold cross validation, can help evaluate overfitting
+m0.cv <- cv.binary(m.global) # remains at 0.708, potential overfitting
 m0.cv <- cv.binary(m.noVIF) # remains at 0.758
-m0.cv <- cv.binary(m.dredge) # remains at 0.662
+m0.cv <- cv.binary(m.dredge) # remains at 0.662, potential minimal overfitting
 m0.cv <- cv.binary(m.fins.only) # 
 m0.cv <- cv.binary(m.dorsal.only) # remains at 0.763, no indication of overfitting
 m0.cv <- cv.binary(m.dorsal.length) # remains at 0.879, no indication of overfitting
 m0.cv <- cv.binary(m.250) # remains at 0.788, no indication of overfitting
 m0.cv <- cv.binary(m.300) # remains at 0.667, no indication of overfitting
-#Most of these indicate overfitting, except for the dorsal.length model
-#But I dont think that matters since the LOOCV was a better tool for this job anyways, since its a small dataset. 
-
-
 
 
 #Assess the predictive accuracy. This basically does the same thing as LOOCV, except not as good....
@@ -882,7 +500,7 @@ glm(full.dat$sex_num ~ fitted(m.dorsal.length) + I(fitted(m.dorsal.length)^2), f
 
 glm(full.dat$sex_num ~ fitted(m.250) + I(fitted(m.250)^2), family = binomial) #
 
-glm(full.dat$sex_num ~ fitted(m.300) + I(fitted(m.3000)^2), family = binomial) #
+glm(full.dat$sex_num ~ fitted(m.300) + I(fitted(m.300)^2), family = binomial) #
 
 
 
@@ -923,7 +541,7 @@ cowplot::plot_grid(bin_pred_plot, bin_MEF_plot, bin_SL.MEF_plot, labels = "AUTO"
 
 
 
-###The following tests are from: _______________________________________________
+###The following tests are from: 
 #http://www.sthda.com/english/articles/36-classification-methods-essentials/148-logistic-regression-assumptions-and-diagnostics-in-r/ 
 
 
@@ -976,6 +594,213 @@ model.data %>%
 
 
 
+
+
+
+
+# This is my Leave One Out Cross Validation -------------------------------
+full.dat <- read.csv("full.dat.edited.csv")
+
+
+full.dat <- read.csv("full.dat.edited.csv") #97 obs
+
+#full.dat <- full.dat %>% filter(fork_length >249) #79 obs
+#full.dat <- full.dat %>% filter(fork_length >299)  #66 obs
+
+
+colnames(full.dat)[apply(full.dat, 2, anyNA)]
+
+
+#Replace NAs with the mean of the parameter
+full.dat <- full.dat %>% 
+  mutate(s = ifelse(is.na(s), mean(s, na.rm = TRUE), s)) %>% 
+  mutate(o = ifelse(is.na(o), mean(o, na.rm = TRUE), o)) %>% 
+  mutate(t = ifelse(is.na(t), mean(t, na.rm = TRUE), t)) 
+
+
+
+global_pred <- vector()
+
+for(i in 1:97){
+  validate.dat <- full.dat[i,] #Single out one value
+  training.dat <- full.dat[-i,] #Use the training data using the data -i
+  m.global <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = full.dat, family = "binomial")
+  global_pred[i] <- predict(m.global, newdata = validate.dat, type = "response")
+  
+}
+
+
+
+
+
+dredge_pred <- vector()
+
+for(i in 1:97){
+  validate.dat <- full.dat[i,] #Single out one value
+  training.dat <- full.dat[-i,] #Use the training data using the data -i
+  m.dredge <- glm(sex_num ~ a+e+j+q+r+s+v, data = training.dat, family = "binomial")
+  dredge_pred[i] <- predict(m.dredge, newdata = validate.dat, type = "response")
+  
+}
+
+
+
+fins_only_pred <- vector()
+
+for(i in 1:97){
+  validate.dat <- full.dat[i,] #Single out one value
+  training.dat <- full.dat[-i,] #Use the training data using the data -i
+  um.fins.only <- glm(sex_num ~ l+m+n+o+p+q+r+s+t+v, data = full.dat, family = "binomial")
+  fins_only_pred[i] <- predict(m.fins.only, newdata = validate.dat, type = "response")
+  
+}
+
+
+dorsal_all_pred <- vector()
+
+for(i in 1:97){
+  validate.dat <- full.dat[i,] #Single out one value
+  training.dat <- full.dat[-i,] #Use the training data using the data -i
+  m.dorsal.all <- glm(sex_num ~ h+l+m+n #g+v
+                      , data = full.dat, family = "binomial")
+  dorsal_all_pred[i] <- predict(m.dorsal.all, newdata = validate.dat, type = "response")
+  
+}
+
+
+dorsal_length_pred <- vector()
+
+for(i in 1:97){
+  validate.dat <- full.dat[i,] #Single out one value
+  training.dat <- full.dat[-i,] #Use the training data using the data -i
+  m.dorsal.length <- glm(sex_num ~ n
+                         , data = full.dat, family = "binomial")
+  dorsal_length_pred[i] <- predict(m.dorsal.length, newdata = validate.dat, type = "response")
+  
+}
+
+
+
+
+grayling_dat_250 <- full.dat %>% 
+  filter(fork_length >249)
+
+M250_pred <- vector()
+
+for(i in 1:97){
+  validate.dat <- full.dat[i,] #Single out one value
+  training.dat <- full.dat[-i,] #Use the training data using the data -i
+  m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = grayling_dat_250, family = "binomial")
+  M250_pred[i] <- predict(m.250, newdata = validate.dat, type = "response")
+  
+}
+
+
+
+
+grayling_dat_300 <- full.dat %>% 
+  filter(fork_length >299)
+
+
+M300_pred <- vector()
+
+for(i in 1:97){
+  validate.dat <- full.dat[i,] #Single out one value
+  training.dat <- full.dat[-i,] #Use the training data using the data -i
+  m.300 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = grayling_dat_300, family = "binomial")
+  M300_pred[i] <- predict(m.300, newdata = validate.dat, type = "response")
+  
+}
+
+
+full.dat <- cbind(full.dat, global_pred,  noVIF_pred, reduced_pred, fins_only_pred, dorsal_all_pred, dorsal_length_pred, M250_pred, M300_pred, dredge_pred) 
+
+
+
+
+#Get missclassifications
+full.dat <- full.dat %>% 
+  mutate(global_pred = ifelse(global_pred>0.5, 1, 0)) %>% 
+  mutate("global_pred_wrong" = ifelse(global_pred == sex_num, 0, 1)) %>% 
+  
+  mutate(dredge_pred = ifelse(dredge_pred>0.5, 1, 0)) %>% 
+  mutate("dredge_pred_wrong" = ifelse(dredge_pred == sex_num, 0, 1)) %>% 
+  
+  mutate(fins_only_pred = ifelse(fins_only_pred>0.5, 1, 0)) %>% 
+  mutate("fins_only_pred_wrong" = ifelse(fins_only_pred == sex_num, 0, 1)) %>% 
+  
+  mutate(dorsal_all_pred = ifelse(dorsal_all_pred>0.5, 1, 0)) %>% 
+  mutate("dorsal_all_pred_wrong" = ifelse(dorsal_all_pred == sex_num, 0, 1)) %>%
+  
+  mutate(dorsal_length_pred = ifelse(dorsal_length_pred>0.5, 1, 0)) %>% 
+  mutate("dorsal_length_pred_wrong" = ifelse(dorsal_length_pred == sex_num, 0, 1)) %>% 
+  
+  mutate(M250_pred = ifelse(M250_pred>0.5, 1, 0)) %>% 
+  mutate("M250_pred_wrong" = ifelse(M250_pred == sex_num, 0, 1)) %>% 
+  
+  mutate(M300_pred = ifelse(M300_pred>0.5, 1, 0)) %>% 
+  mutate("M300_pred_wrong" = ifelse(M300_pred == sex_num, 0, 1)) 
+
+
+
+
+
+percent_calc <- function(x) {
+  
+  percent_wrong <- (((sum(x))/(length(x)))*100)
+  
+  return(percent_wrong)
+  
+  
+} 
+
+
+#Calculate the misclassification rate
+percent_global <- percent_calc(full.dat$global_pred_wrong)
+
+percent_dredge <- percent_calc(full.dat$dredge_pred_wrong)
+
+percent_fins <- percent_calc(full.dat$fins_only_pred_wrong)
+
+percent_dorsal_all <- percent_calc(full.dat$dorsal_all_pred_wrong)
+
+percent_dorsal_length <- percent_calc(full.dat$dorsal_length_pred_wrong)
+
+percent_M250 <- percent_calc(full.dat$M250_pred_wrong)
+
+percent_M300 <- percent_calc(full.dat$M300_pred_wrong)
+
+
+print(cbind(percent_global, percent_dredge, percent_fins, percent_dorsal_all, percent_dorsal_length, percent_M250, percent_M300))
+
+
+#Full.dat
+#percent_global percent_dredge percent_fins percent_dorsal_all 
+15.464          29.89691         16.49485        15.46392           
+#percent_dorsal_length  percent_M250     percent_M300
+18.5567                      6.19           12.37113
+
+
+#Fish >250
+#percent_global percent_dredge percent_fins percent_dorsal_all 
+0                   25.316      12.65823       15.18987              
+#percent_dorsal_length  percent_M250   percent_M300
+15.18987                 0              7.594937
+
+
+
+#Fish >300
+#percent_global percent_dredge  percent_fins  #percent_dorsal_all
+0                 30.303            6.060606          10.60606               
+#percent_dorsal_length   percent_M250      percent_M300
+    10.60606                    0               0
+
+
+
+
+
+
+
 # Plotting results --------------------------------------------------------
 
 
@@ -987,21 +812,16 @@ model.data %>%
 #install.packages("popbio")
 library(popbio)
 logi.hist.plot(full.dat$posterior_dorsal_height_FL_n, full.dat$sex_num ,boxp=FALSE,type="hist",col="gray", logi.mod = 1)
+###I am just going to replicate this ^^ with ggplot
 
-
-###Need to figure out how to replicate this with ggplot
 
 
 full.dat$fork_length <- as.numeric(full.dat$fork_length)
 
 
-
 full.dat <- full.dat %>% 
   mutate("male"=ifelse(sex_num==0, n, NA)) %>% 
   mutate("female"=ifelse(sex_num==1, n, NA))  
-
-
-
 
 
 p <- ggplot(full.dat) + 
@@ -1446,14 +1266,6 @@ ggsave(plot= panel,
 
 
 
-#library(scatterplot3d)
-#scatterplot3d(full.dat[,c(4,42,56)]) #4=sex,42=c, 56=q
-
-
-#This one seems great!
-#install.packages("plotly")
-#library(plotly)
-
 
 #library(plotly)
 https://plotly.com/r/3d-scatter-plots/
@@ -1482,44 +1294,51 @@ fig1 <- plot_ly(full.dat, x = ~posterior_dorsal_height_FL_n,
                       zaxis = list(title = 'Pectoral Fin Height'))) 
 
 fig1
-#how to change the point size? size = .... OR sizes = c(...,...)????
-full.dat$fork_length
 
-
-
-
-
-fig2 <- plot_ly(full.dat, x = ~m, y = ~n, z = ~o,
-                color = ~Sex, colors = c('#BF382A', '#0C4B8E'), showscale = FALSE) #%>% 
-#sizes = Fork_Length_mm) %>% 
-#add_markers()  #%>% 
-#fig, marker = list(size = 5)) 
-#layout(scene = list(xaxis = list(title = 'Posterior Dorsal Height'),
-#                    yaxis = list(title = 'Pelvic Fin Length'),
-#                    zaxis = list(title = 'Dorsal Fin Base Length')))
-fig2
-
-
-
-
-
-ggplot(full.dat, aes(x=o, y=i, color=Sex))+
-  geom_point()+
-  theme_classic()
-
-
-
-#you can also plot maps! e.g
-plot_geo(sample, locationmode='USA-states') %>%
-  add_markers(y=~lat, x=~long, hoverinfo="text",
-              color=~Group, text=~Group, size=~Value, 
-              marker=list(sizeref=0.1, sizemode="area")) %>%
-  layout(title='plotly marker map', geo=x)
-
-#And much more
-https://plotly.com/r/
   
   
   
   
+  
+  
+  
+  
+  
+  
+
+# Use the recommended models to predict Arctic Grayling sex ---------------
+
+### Train the models
+
+#Global 250 model
+grayling_dat_250 <- full.dat %>% 
+  filter(fork_length >249)
+str(grayling_dat_250)
+summary(grayling_dat_250$fork_measured)
+
+m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_250, family = "binomial")
+summary(m.250)
+
+#just dorsal fin LENGTH (Posterior Dorsal Height)
+m.dorsal.length <- glm(sex_num ~ n, data = full.dat, family = "binomial")
+
+
+
+###Create your dataset like this (all these measurements are standardized by fork length:
+str(full.dat[,c(5,62:83)])
+  
+
+#predict with the m.250 model
+sex_pred <- predict(m.250, newdata = full.dat, type = "response")
+#1 = female, 0 = male
+
+precition.dat <- cbind(sex_pred, full.dat)
+
+
+#repeat with the dorsal_length mode
+sex_pred_dorsal <- predict(m.dorsal.length, newdata = full.dat, type = "response")
+#1 = female, 0 = male
+
+precition.dat <- cbind(sex_pred_dorsal, precition.dat)
+
   
