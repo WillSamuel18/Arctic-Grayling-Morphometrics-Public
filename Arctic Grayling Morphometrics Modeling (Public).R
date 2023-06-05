@@ -5,7 +5,7 @@
 ################################################################################
 
 
-#If you only want to use this code to predict, that begins on line 1307
+#If you only want to use this code to predict fish sex, that begins on line 1309
 
 
 
