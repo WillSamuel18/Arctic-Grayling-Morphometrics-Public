@@ -287,16 +287,16 @@ options(na.action = "na.omit")
 
 
 
-m.dredge <- glm(sex_num ~ a+e+j+q+r+s+v, data = full.dat, family = "binomial")
+m.dredge <- glm(sex_num ~ a+e+j+q+r+s+v+n, data = full.dat, family = "binomial")
 summary(m.dredge)
 
 nagelkerke(m.dredge)
 accuracy(list(m.dredge))
 #Pseudo.R.squared                   With NA     NA -> mean
-#McFadden                            0.345        0.238
-#Cox and Snell (ML)                  0.395        0.280
-#Nagelkerke (Cragg and Uhler)        0.515        0.375
-#Efron.r.squared                     0.368        0.311
+#McFadden                            0.        0.355
+#Cox and Snell (ML)                  0.        0.388
+#Nagelkerke (Cragg and Uhler)        0.        0.518
+#Efron.r.squared                     0.        0.483
 
 
 
@@ -605,7 +605,7 @@ full.dat <- read.csv("full.dat.edited.csv")
 full.dat <- read.csv("full.dat.edited.csv") #97 obs
 
 #full.dat <- full.dat %>% filter(fork_length >249) #79 obs
-#full.dat <- full.dat %>% filter(fork_length >299)  #66 obs
+full.dat <- full.dat %>% filter(fork_length >299)  #66 obs
 
 
 colnames(full.dat)[apply(full.dat, 2, anyNA)]
@@ -638,7 +638,7 @@ dredge_pred <- vector()
 for(i in 1:97){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.dredge <- glm(sex_num ~ a+e+j+q+r+s+v, data = training.dat, family = "binomial")
+  m.dredge <- glm(sex_num ~ a+e+j+q+r+s+v+n, data = training.dat, family = "binomial")
   dredge_pred[i] <- predict(m.dredge, newdata = validate.dat, type = "response")
   
 }
@@ -776,14 +776,14 @@ print(cbind(percent_global, percent_dredge, percent_fins, percent_dorsal_all, pe
 
 #Full.dat
 #percent_global percent_dredge percent_fins percent_dorsal_all 
-15.464          29.89691         16.49485        15.46392           
+15.464          20.61856         16.49485        15.46392           
 #percent_dorsal_length  percent_M250     percent_M300
 18.5567                      6.19           12.37113
 
 
 #Fish >250
 #percent_global percent_dredge percent_fins percent_dorsal_all 
-0                   25.316      12.65823       15.18987              
+0                   15.18987      12.65823       15.18987              
 #percent_dorsal_length  percent_M250   percent_M300
 15.18987                 0              7.594937
 
@@ -791,7 +791,7 @@ print(cbind(percent_global, percent_dredge, percent_fins, percent_dorsal_all, pe
 
 #Fish >300
 #percent_global percent_dredge  percent_fins  #percent_dorsal_all
-0                 30.303            6.060606          10.60606               
+0                  13.63636            6.060606          10.60606               
 #percent_dorsal_length   percent_M250      percent_M300
     10.60606                    0               0
 
@@ -1319,26 +1319,33 @@ summary(grayling_dat_250$fork_measured)
 m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_250, family = "binomial")
 summary(m.250)
 
+
+
 #just dorsal fin LENGTH (Posterior Dorsal Height)
 m.dorsal.length <- glm(sex_num ~ n, data = full.dat, family = "binomial")
 
 
 
-###Create your dataset like this (all these measurements are standardized by fork length:
+###Create your dataset like this (all these measurements are standardized by fork length):
 str(full.dat[,c(5,62:83)])
-  
+#(you'll want to name each parameter by just the letter (e.g., "a", "b", "c"...),
+#I included the full name in the column headings )
 
 #predict with the m.250 model
-sex_pred <- predict(m.250, newdata = full.dat, type = "response")
+sex_pred_250 <- predict(m.250, newdata = full.dat, type = "response")
 #1 = female, 0 = male
 
-precition.dat <- cbind(sex_pred, full.dat)
+#Here is your prediction!
+sex_pred_250
+
+#Join it to the dataset so you can tell which fish is which. That's it!
+precition.dat <- cbind(sex_pred_250, full.dat)
 
 
-#repeat with the dorsal_length mode
+
+#repeat with the dorsal_length model (if desired)
 sex_pred_dorsal <- predict(m.dorsal.length, newdata = full.dat, type = "response")
 #1 = female, 0 = male
 
-precition.dat <- cbind(sex_pred_dorsal, precition.dat)
+precition.dat <- cbind(sex_pred_dorsal, precition.dat) 
 
-  
