@@ -12,6 +12,7 @@
 library(tidyverse)  #general data manipulation
 library(ggplot2)    #plotting
 library(cowplot)    #for cleaner ggplots
+library(ggcorrplot) #to make a correlation plot
 library(patchwork)  #Panel plots
 library(MuMIn)      #To Dredge the model choices
 library(AICcmodavg) #for model statistics
@@ -23,12 +24,8 @@ library(DAAG)       #Evaluating the model
 setwd("C:/Users/npwil/OneDrive/Desktop/School/Grad School/Side Quests/Grayling morphometrics project/Arctic-Grayling-Morphometrics-Public")
 
 
-#full.dat <- read.csv("Combined_fish_sample_data V4.csv")
 
-full.dat <- read.csv("full.dat.edited.csv")
-
-
-
+full.dat <- read.csv("full.dat.final.csv")
 
 
 
@@ -68,12 +65,12 @@ fl_hist <- ggplot(data=full.dat, aes(x=fork_length, fill = Sex))+
   facet_wrap(~Sex)
 fl_hist
 
-ggsave(plot= fl_hist,
-       filename = "R_Figures/Fork Length Histogram.jpeg",
-       dpi = 2000, 
-       height = 4,
-       width = 6,
-       units = "in")
+#ggsave(plot= fl_hist,
+#       filename = "/Fork Length Histogram.jpeg",
+#       dpi = 2000, 
+#       height = 4,
+#       width = 6,
+#       units = "in")
 
 
 
@@ -137,12 +134,12 @@ fl_n_density <- ggplot(data=full.dat, aes(x=n, fill = Sex))+
 #facet_wrap(~Sex)
 fl_n_density
 
-ggsave(plot= fl_n_density,
-       filename = "R_Figures/Posterior Dorsal Height Density.jpeg",
-       dpi = 2000, 
-       height = 5,
-       width = 5,
-       units = "in")
+#ggsave(plot= fl_n_density,
+#       filename = "R_Figures/Posterior Dorsal Height Density.jpeg",
+#       dpi = 2000, 
+#       height = 5,
+#       width = 5,
+#       units = "in")
 
 
 
@@ -264,7 +261,7 @@ full.dat <- full.dat %>%
 
 
 #Final Global Model (without colinear predictors, g and K)
-m.global <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = full.dat, family = "binomial")
+m.global <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
 summary(m.global)         
 
 nagelkerke(m.global)
@@ -286,8 +283,8 @@ options(na.action = "na.omit")
 
 
 
-
-m.dredge <- glm(sex_num ~ a+e+j+q+r+s+v+n, data = full.dat, family = "binomial")
+#Note that I added Posterior Dorsal Height (N) here, refer to the manuscript
+m.dredge <- glm(sex_num ~ a+e+j+q+r+s+u+n, data = full.dat, family = "binomial")
 summary(m.dredge)
 
 nagelkerke(m.dredge)
@@ -302,7 +299,7 @@ accuracy(list(m.dredge))
 
 
 #Just fins
-m.fins.only <- glm(sex_num ~ l+m+n+o+p+q+r+s+t+v, data = full.dat, family = "binomial")
+m.fins.only <- glm(sex_num ~ l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
 summary(m.fins.only)
 
 nagelkerke(m.fins.only)
@@ -353,7 +350,7 @@ grayling_dat_250 <- full.dat %>%
 str(grayling_dat_250)
 summary(grayling_dat_250$fork_measured)
 
-m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = grayling_dat_250, family = "binomial")
+m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_250, family = "binomial")
 summary(m.250)
 
 nagelkerke(m.250)
@@ -372,7 +369,7 @@ grayling_dat_300 <- full.dat %>%
 str(grayling_dat_300)
 summary(grayling_dat_300$fork_measured)
 
-m.300 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = grayling_dat_300, family = "binomial")
+m.300 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_300, family = "binomial")
 summary(m.300)
 
 nagelkerke(m.300)
@@ -599,13 +596,13 @@ model.data %>%
 
 
 # This is my Leave One Out Cross Validation -------------------------------
-full.dat <- read.csv("full.dat.edited.csv")
 
 
-full.dat <- read.csv("full.dat.edited.csv") #97 obs
+full.dat <- read.csv("full.dat.final.csv")  #97 obs
 
+#Rotate through these two filter to test with diffeent minimum length thresholds
 #full.dat <- full.dat %>% filter(fork_length >249) #79 obs
-full.dat <- full.dat %>% filter(fork_length >299)  #66 obs
+#full.dat <- full.dat %>% filter(fork_length >299)  #66 obs
 
 
 colnames(full.dat)[apply(full.dat, 2, anyNA)]
@@ -624,7 +621,7 @@ global_pred <- vector()
 for(i in 1:97){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.global <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = full.dat, family = "binomial")
+  m.global <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
   global_pred[i] <- predict(m.global, newdata = validate.dat, type = "response")
   
 }
@@ -638,7 +635,7 @@ dredge_pred <- vector()
 for(i in 1:97){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.dredge <- glm(sex_num ~ a+e+j+q+r+s+v+n, data = training.dat, family = "binomial")
+  m.dredge <- glm(sex_num ~ a+e+j+q+r+s+u+n, data = training.dat, family = "binomial")
   dredge_pred[i] <- predict(m.dredge, newdata = validate.dat, type = "response")
   
 }
@@ -650,7 +647,7 @@ fins_only_pred <- vector()
 for(i in 1:97){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
-  um.fins.only <- glm(sex_num ~ l+m+n+o+p+q+r+s+t+v, data = full.dat, family = "binomial")
+  um.fins.only <- glm(sex_num ~ l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
   fins_only_pred[i] <- predict(m.fins.only, newdata = validate.dat, type = "response")
   
 }
@@ -690,7 +687,7 @@ M250_pred <- vector()
 for(i in 1:97){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = grayling_dat_250, family = "binomial")
+  m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_250, family = "binomial")
   M250_pred[i] <- predict(m.250, newdata = validate.dat, type = "response")
   
 }
@@ -707,7 +704,7 @@ M300_pred <- vector()
 for(i in 1:97){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
-  m.300 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+v, data = grayling_dat_300, family = "binomial")
+  m.300 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_300, family = "binomial")
   M300_pred[i] <- predict(m.300, newdata = validate.dat, type = "response")
   
 }
@@ -807,7 +804,7 @@ print(cbind(percent_global, percent_dredge, percent_fins, percent_dorsal_all, pe
 
 
 #Signficiant predictors in the single model: 
-#c, d, h, l, n, p, q, r, s, u, v
+#c, d, h, l, n, p, q, r, s, u, u
 
 #install.packages("popbio")
 library(popbio)
@@ -843,7 +840,7 @@ p <- ggplot(full.dat) +
 p
 
 ggsave(plot= p,
-       filename = "R_Figures/Posterior Dorsal Height model 3.jpeg",
+       filename = "Posterior Dorsal Height model 3.jpeg",
        dpi = 2000, 
        height = 5,
        width = 5.5,
@@ -873,7 +870,7 @@ p_density
 
 
 ggsave(plot= p_density,
-       filename = "R_Figures/Posterior Dorsal Height w/ Density.jpeg",
+       filename = "Posterior Dorsal Height w/ Density.jpeg",
        dpi = 2000, 
        height = 5,
        width = 5.5,
@@ -1090,7 +1087,7 @@ ggsave(plot= p6,
 
 
 
-p7 <- ggplot(full.dat, aes(x = dorsal_to_adipose_FL_v, y = sex_num, color = Sex)) +
+p7 <- ggplot(full.dat, aes(x = dorsal_to_adipose_FL_u, y = sex_num, color = Sex)) +
   geom_point(aes(shape = Sex), size = 3) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
@@ -1267,8 +1264,8 @@ ggsave(plot= panel,
 
 
 
-#library(plotly)
-https://plotly.com/r/3d-scatter-plots/
+library(plotly)
+#https://plotly.com/r/3d-scatter-plots/
   
   
   
@@ -1276,7 +1273,7 @@ https://plotly.com/r/3d-scatter-plots/
 #Things to consider adding:
 #Scale size by fork length???
 #Make points a darker shade as you move backwards so you can see the z axis variation better?  
-pect.pelvic_distance_FL_i
+
 
 fig1 <- plot_ly(full.dat, x = ~posterior_dorsal_height_FL_n, 
                 y = ~pectoral_fin_length_FL_q, 
@@ -1330,6 +1327,9 @@ m.dorsal.length <- glm(sex_num ~ n, data = full.dat, family = "binomial")
 str(full.dat[,c(5,62:83)])
 #(you'll want to name each parameter by just the letter (e.g., "a", "b", "c"...),
 #I included the full name in the column headings )
+
+
+
 
 #predict with the m.250 model
 sex_pred_250 <- predict(m.250, newdata = full.dat, type = "response")
