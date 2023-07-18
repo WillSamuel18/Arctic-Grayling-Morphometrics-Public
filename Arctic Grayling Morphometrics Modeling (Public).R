@@ -144,6 +144,76 @@ fl_n_density
 #       units = "in")
 
 
+#Summary stats for Table 1
+t.test(x = m$a, y = f$a, paired = F) #T = 0.3755, p = 0.7081 
+wilcox.test(x = m$a, y = f$a, paired = F) #W = 1168, p = 0.9913
+
+t.test(x = m$b, y = f$b, paired = F) #T = 0.98516, p = 0.3272
+wilcox.test(x = m$b, y = f$b, paired = F) #W = 1325, p = 0.2637
+
+t.test(x = m$c, y = f$c, paired = F) #T = 3.614, p = 0.0004845
+wilcox.test(x = m$c, y = f$c, paired = F)  #W = 1666, p = 0.0003379
+
+t.test(x = m$d, y = f$d, paired = F) #T = 2.9761, p = 0.003737
+wilcox.test(x = m$d, y = f$d, paired = F)  #W = 1580, p = 0.003054
+
+t.test(x = m$e, y = f$e, paired = F) #T = 0.73499, p = 0.4642
+wilcox.test(x = m$e, y = f$e, paired = F)  #W = 1322, p = 0.2731
+
+t.test(x = m$f, y = f$f, paired = F) #T = -0.15344, p = 0.8785
+wilcox.test(x = m$f, y = f$f, paired = F)  #W = 1026, p = 0.2992
+
+t.test(x = m$g, y = f$g, paired = F) #T = -1.033, p =0.3043
+wilcox.test(x = m$g, y = f$g, paired = F) #W = 1028, p = 0.306
+
+t.test(x = m$h, y = f$h, paired = F) #T = -1.8175, p = 0.07251
+wilcox.test(x = m$h, y = f$h, paired = F) #W = 923, p = 0.07456
+
+t.test(x = m$i, y = f$i, paired = F) #T = -0.78679 p = 0.4334
+wilcox.test(x = m$i, y = f$i, paired = F)  #W = 1075, p = 0.4942
+
+t.test(x = m$j, y = f$j, paired = F) #T = -1.2081, p = 0.2306
+wilcox.test(x = m$j, y = f$j, paired = F)  #W = 964, p = 0.1371
+
+t.test(x = m$k, y = f$k, paired = F) #T = 0.069451, p = 0.9448
+wilcox.test(x = m$k, y = f$k, paired = F)  #W = 1126, p = 0.753
+
+t.test(x = m$l, y = f$l, paired = F) #T = 2.9207, p = 0.004584
+wilcox.test(x = m$l, y = f$l, paired = F) #W = 1557, p = 0.005176
+
+t.test(x = m$m, y = f$m, paired = F) #T = -0.97414, p = 0.3325
+wilcox.test(x = m$m, y = f$m, paired = F) #W = 1025, p = 0.2959
+
+t.test(x = m$n, y = f$n, paired = F) #T = 6.3786, p < 0.00001
+wilcox.test(x = m$n, y = f$n, paired = F) #W = 1975, p < 0.00001
+
+t.test(x = m$o, y = f$o, paired = F) #T = 1.817, p = 0.07315
+wilcox.test(x = m$o, y = f$o, paired = F)  #W = 1423, p = 0.04057
+
+t.test(x = m$p, y = f$p, paired = F) #T = -1.4251, p = 0.1575
+wilcox.test(x = m$p, y = f$p, paired = F)  #W = 959, p = 0.1278
+
+t.test(x = m$q, y = f$q, paired = F) #T = 3.8892, p = 0.0002065
+wilcox.test(x = m$q, y = f$q, paired = F)  #W = 1743, p = 0.00003452
+
+t.test(x = m$r, y = f$r, paired = F) #T = 3.7932, p = 0.0003416
+wilcox.test(x = m$r, y = f$r, paired = F)  #W = 1557, p = 0.005176
+
+t.test(x = m$s, y = f$s, paired = F) #T = -2.015, p = 0.04691
+wilcox.test(x = m$s, y = f$s, paired = F) #W = 778, p = 0.03596
+
+t.test(x = m$t, y = f$t, paired = F) #T = 1.0687, p = 0.2889
+wilcox.test(x = m$t, y = f$t, paired = F)  #W = 727, p = 0.2635
+
+t.test(x = m$u, y = f$u, paired = F) #T = 5.3043, p < 0.00001
+wilcox.test(x = m$u, y = f$u, paired = F)  #W = 1892, p < 0.00001
+
+t.test(x = m$v, y = f$v, paired = F) #T = -2.7168, p = 0.00798
+wilcox.test(x = m$v, y = f$v, paired = F)  #W = 823, p = 0.01219
+
+
+
+
 
 
 
