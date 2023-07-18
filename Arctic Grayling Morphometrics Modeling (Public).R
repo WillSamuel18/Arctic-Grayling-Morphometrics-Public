@@ -47,7 +47,7 @@ ggplot(data=full.dat, aes(x=fork_length))+
   labs(#title = "Fork Length of Sample", 
     x = "Fork Length (mm)", y = "Count")+
   theme()
-scale_y_continuous(expand=c(0,0),limits=c(0,20), breaks = c(5, 10, 15, 20))
+#scale_y_continuous(expand=c(0,0),limits=c(0,20), breaks = c(5, 10, 15, 20))
 
 
 
@@ -60,7 +60,10 @@ fl_hist <- ggplot(data=full.dat, aes(x=fork_length, fill = Sex))+
     x = "Fork Length (mm)", y = "Count")+
   scale_y_continuous(expand=c(0,0),limits=c(0,12), breaks = c(2,4,6,8,10,12))+
   scale_fill_manual(values = c("darkred", "darkblue"))+
-  scale_alpha_manual(values = 0.8)+
+  scale_alpha_manual(values = 0.8)+  
+  #geom_vline(xintercept = 245, lwd = 1, linetype = 1)+ #50% maturity size threshold for the Chena River
+  #geom_vline(xintercept = 275, lwd = 1, linetype = 2)+ #50% maturity size threshold for the Chatanika River
+  geom_vline(xintercept = 260, lwd = 1, linetype = 2)+ #50% of the population are mature at this fork length, averaged across the 2 rivers
   theme(legend.position = "none")+
   facet_wrap(~Sex)
 fl_hist
@@ -71,7 +74,6 @@ fl_hist
 #       height = 4,
 #       width = 6,
 #       units = "in")
-
 
 
 ggplot(data=full.dat, aes(x=fork_length))+
