@@ -993,6 +993,24 @@ m.pred$sex_num
 
 
 
+
+
+
+
+n <- glm(sex_num ~ n, data = full.dat, family = "binomial")
+summary(n)         
+
+nagelkerke(n)
+accuracy(list(n))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.267
+#Cox and Snell (ML)                   0.309
+#Nagelkerke (Cragg and Uhler)         0.412
+#Efron.r.squared                      0.389
+
+#MEAN   0.369
+
+
 p1 <- ggplot(full.dat, aes(x = posterior_dorsal_height_FL_n, y = sex_num, color = Sex)) +
   geom_point(aes(shape = Sex), size = 3) +
   #geom_line(aes(y=model))+
@@ -1007,7 +1025,7 @@ p1 <- ggplot(full.dat, aes(x = posterior_dorsal_height_FL_n, y = sex_num, color 
   theme(axis.title.y = element_blank(), 
         #axis.ticks.y = element_blank(), 
         #axis.text.y = element_blank(),
-        legend.position = c(0.90, 0.90))+
+        legend.position = "none")+
   labs(x="Posterior Dorsal Height (N)")
 p1
 
@@ -1018,6 +1036,21 @@ p1
 #       width = 4,
 #       units = "in")
 
+
+
+
+l <- glm(sex_num ~ l, data = full.dat, family = "binomial")
+summary(l)         
+
+nagelkerke(l)
+accuracy(list(l))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.065
+#Cox and Snell (ML)                   0.086
+#Nagelkerke (Cragg and Uhler)         0.114
+#Efron.r.squared                      0.092
+
+#MEAN   0.089
 
 
 p2 <- ggplot(full.dat, aes(x = dorsal_fin_base_length_FL_l, y = sex_num, color = Sex)) +
@@ -1047,6 +1080,23 @@ ggsave(plot= p2,
        units = "in")
 
 
+
+
+
+c <- glm(sex_num ~ c, data = full.dat, family = "binomial")
+summary(c)         
+
+nagelkerke(c)
+accuracy(list(c))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.090
+#Cox and Snell (ML)                   0.117
+#Nagelkerke (Cragg and Uhler)         0.157
+#Efron.r.squared                      0.12
+
+#MEAN   0.121
+
+
 p3 <- ggplot(full.dat, aes(x = postorbital_length_FL_c, y = sex_num, color = Sex)) +
   geom_point(aes(shape = Sex), size = 3) +
   #geom_line(aes(y=model))+
@@ -1061,7 +1111,7 @@ p3 <- ggplot(full.dat, aes(x = postorbital_length_FL_c, y = sex_num, color = Sex
   theme(axis.title.y = element_blank(), 
         #axis.ticks.y = element_blank(), 
         #axis.text.y = element_blank(),
-        legend.position = "none")+
+        legend.position = c(0.80, 0.71))+
   labs(x="Post-Orbital Length (C)")
 p3
 
@@ -1071,6 +1121,25 @@ ggsave(plot= p3,
        height = 4,
        width = 4,
        units = "in")
+
+
+
+
+
+
+
+p <- glm(sex_num ~ p, data = full.dat, family = "binomial")
+summary(p)         
+
+nagelkerke(p)
+accuracy(list(p))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.0154
+#Cox and Snell (ML)                   0.02099
+#Nagelkerke (Cragg and Uhler)         0.0280
+#Efron.r.squared                      0.021
+
+#MEAN   0.021
 
 
 p4 <- ggplot(full.dat, aes(x = anal_fin_height_FL_p, y = sex_num, color = Sex)) +
@@ -1100,6 +1169,21 @@ ggsave(plot= p4,
 
 
 
+
+
+h <- glm(sex_num ~ h, data = full.dat, family = "binomial")
+summary(h)         
+
+nagelkerke(h)
+accuracy(list(h))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.025
+#Cox and Snell (ML)                   0.034
+#Nagelkerke (Cragg and Uhler)         0.046
+#Efron.r.squared                      0.035
+
+#MEAN   0.035
+
 p5 <- ggplot(full.dat, aes(x = postdorsal_length_FL_h, y = sex_num, color = Sex)) +
   geom_point(aes(shape = Sex), size = 3) +
   #geom_line(aes(y=model))+
@@ -1128,8 +1212,18 @@ ggsave(plot= p5,
 
 
 
+r <- glm(sex_num ~ r, data = full.dat, family = "binomial")
+summary(r)         
 
+nagelkerke(r)
+accuracy(list(r))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.111
+#Cox and Snell (ML)                   0.142
+#Nagelkerke (Cragg and Uhler)         0.189
+#Efron.r.squared                      0.138
 
+#MEAN   0.0145
 
 p6 <- ggplot(full.dat, aes(x = pelvic_fin_length_FL_r, y = sex_num, color = Sex)) +
   geom_point(aes(shape = Sex), size = 3) +
@@ -1159,6 +1253,23 @@ ggsave(plot= p6,
 
 
 
+
+
+u <- glm(sex_num ~ u, data = full.dat, family = "binomial")
+summary(u)         
+
+nagelkerke(u)
+accuracy(list(u))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.056
+#Cox and Snell (ML)                   0.074
+#Nagelkerke (Cragg and Uhler)         0.099
+#Efron.r.squared                      0.073
+
+#MEAN   0.0755
+
+
+
 p7 <- ggplot(full.dat, aes(x = dorsal_to_adipose_FL_u, y = sex_num, color = Sex)) +
   geom_point(aes(shape = Sex), size = 3) +
   #geom_line(aes(y=model))+
@@ -1174,7 +1285,7 @@ p7 <- ggplot(full.dat, aes(x = dorsal_to_adipose_FL_u, y = sex_num, color = Sex)
         #axis.ticks.y = element_blank(), 
         #axis.text.y = element_blank(),
         legend.position = "none")+
-  labs(x="Dorsal To Adipose Length (V)")
+  labs(x="Dorsal To Adipose Length (U)")
 p7
 
 ggsave(plot= p7,
@@ -1185,6 +1296,21 @@ ggsave(plot= p7,
        units = "in")
 
 
+
+
+
+q <- glm(sex_num ~ q, data = full.dat, family = "binomial")
+summary(q)         
+
+nagelkerke(q)
+accuracy(list(q))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.113
+#Cox and Snell (ML)                   0.144
+#Nagelkerke (Cragg and Uhler)         0.193
+#Efron.r.squared                      0.163
+
+#MEAN   0.153
 
 p8 <- ggplot(full.dat, aes(x = pectoral_fin_length_FL_q, y = sex_num, color = Sex)) +
   geom_point(aes(shape = Sex), size = 3) +
@@ -1211,6 +1337,22 @@ ggsave(plot= p8,
        width = 4,
        units = "in")
 
+
+
+
+
+d <- glm(sex_num ~ d, data = full.dat, family = "binomial")
+summary(d)         
+
+nagelkerke(d)
+accuracy(list(d))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.065
+#Cox and Snell (ML)                   0.086
+#Nagelkerke (Cragg and Uhler)         0.115
+#Efron.r.squared                      0.0888
+
+#MEAN   0.0887
 
 p9 <- ggplot(full.dat, aes(x = head_length_FL_d, y = sex_num, color = Sex)) +
   geom_point(aes(shape = Sex), size = 3) +
@@ -1303,6 +1445,73 @@ p12
 
 
 
+o <- glm(sex_num ~ o, data = full.dat, family = "binomial")
+summary(o)         
+
+nagelkerke(o)
+accuracy(list(o))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.0264
+#Cox and Snell (ML)                   0.0359
+#Nagelkerke (Cragg and Uhler)         0.0479
+#Efron.r.squared                      0.0399
+
+#MEAN   0.0375
+
+p13 <- ggplot(full.dat, aes(x = o, y = sex_num, color = Sex)) +
+  geom_point(aes(shape = Sex), size = 3) +
+  #geom_line(aes(y=model))+
+  #geom_line(aes(y = .fitted), color = "blue") +
+  stat_smooth(method="glm", color="darkgreen", se=TRUE, 
+              method.args = list(family=binomial))+
+  scale_color_manual(values = c("M" = "darkblue", "F" = "darkred"), )+
+  #geom_smooth(method = lm, se =FALSE) +
+  #geom_line()+
+  #geom_smooth()+
+  theme_classic()+
+  theme(axis.title.y = element_blank(), 
+        #axis.ticks.y = element_blank(), 
+        #axis.text.y = element_blank(),
+        legend.position = "none")+
+  labs(x="Anal Fin Base Length (O)")
+p13
+
+
+
+
+s <- glm(sex_num ~ s, data = full.dat, family = "binomial")
+summary(s)         
+
+nagelkerke(s)
+accuracy(list(s))
+#Pseudo.R.squared                    NA -> mean
+#McFadden                             0.0293
+#Cox and Snell (ML)                   0.0397
+#Nagelkerke (Cragg and Uhler)         0.0530
+#Efron.r.squared                      0.0396
+
+#MEAN   0.0404
+
+
+p14 <- ggplot(full.dat, aes(x = s, y = sex_num, color = Sex)) +
+  geom_point(aes(shape = Sex), size = 3) +
+  #geom_line(aes(y=model))+
+  #geom_line(aes(y = .fitted), color = "blue") +
+  stat_smooth(method="glm", color="darkgreen", se=TRUE, 
+              method.args = list(family=binomial))+
+  scale_color_manual(values = c("M" = "darkblue", "F" = "darkred"), )+
+  #geom_smooth(method = lm, se =FALSE) +
+  #geom_line()+
+  #geom_smooth()+
+  theme_classic()+
+  theme(axis.title.y = element_blank(), 
+        #axis.ticks.y = element_blank(), 
+        #axis.text.y = element_blank(),
+        legend.position = "none")+
+  labs(x="Adipose Fin Base Length (S)")
+p14
+
+
 #I think this panel is good for now
 panel<- p1+p2+p5+p7+p4+p6+p8+p3+p9
 panel
@@ -1315,6 +1524,17 @@ ggsave(plot= panel,
        units = "in")
 
 
+
+#UPDATED FINAL PLOT FOR THE MANSUCRIPT
+panel<- p3+p9+p2+p1+p13+p8+p6+p14+p7     
+panel
+
+ggsave(plot= panel,
+       filename = "C:/Users/npwil/OneDrive/Desktop/School/Grad School/Side Quests/Grayling morphometrics project/Arctic-Grayling-Morphometrics-Public/panel final FOR MANUSCRIPT.jpeg",
+       dpi = 1500, 
+       height = 8,
+       width = 8,
+       units = "in")
 
 
 
