@@ -29,6 +29,7 @@ full.dat <- read.csv("full.dat.final.csv")
 
 
 
+
 # Summary Statistics ------------------------------------------------------
 #Number of Females and Males
 str(full.dat)
@@ -214,6 +215,74 @@ wilcox.test(x = m$v, y = f$v, paired = F)  #W = 823, p = 0.01219
 
 
 
+# Replace Missing Values --------------------------------------------------
+
+#Need to replace S, P, T, and O
+
+
+s.model <- glm(s ~ fork_length, data = full.dat)
+nagelkerke(s.model)
+accuracy(list(s.model))
+
+ggplot(full.dat, aes(fork_length, s))+
+  geom_point()+
+  theme_bw()
+
+
+t.model <-glm(t ~ fork_length, data = full.dat)
+nagelkerke(t.model)
+accuracy(list(t.model))
+
+ggplot(full.dat, aes(fork_length, t))+
+  geom_point()+
+  theme_bw()
+
+
+o.model <-glm(o ~ fork_length, data = full.dat)
+nagelkerke(o.model)
+accuracy(list(o.model))
+
+ggplot(full.dat, aes(fork_length, o))+
+  geom_point()+
+  theme_bw()
+
+
+
+#Very low correlation between fork length and these missing parameters, so we will just replace them with randomly assigned missing values:
+
+set.seed(123)
+
+# Loop through each column and replace missing values with random numbers from a normal distribution
+for (column_name in colnames(full.dat)) {
+  # Get the column as a vector
+  column_vector <- full.dat[[column_name]]
+  
+  # Identify missing values
+  missing_values <- is.na(column_vector)
+  
+  # Calculate the mean and standard deviation of the non-missing values
+  mean_non_missing <- mean(column_vector[!missing_values], na.rm = TRUE)
+  sd_non_missing <- sd(column_vector[!missing_values], na.rm = TRUE)
+  
+  # Generate random numbers from a normal distribution with the same mean and standard deviation
+  random_numbers <- rnorm(sum(missing_values), mean = mean_non_missing, sd = sd_non_missing * 2)
+  
+  # Replace missing values with random numbers
+  column_vector[missing_values] <- random_numbers
+  
+  # Assign the updated column back to the dataset
+  full.dat[[column_name]] <- column_vector
+}
+
+
+#View(full.dat)
+
+full.dat$t
+full.dat$s
+full.dat$o
+
+
+
 
 
 
@@ -303,7 +372,7 @@ vif_func<-function(in_frame,thresh=10,trace=T,...){
 
 
 preVIF_dat <- full.dat %>% 
-  select(c(60:80)) 
+  select(c(62:82)) 
 str(preVIF_dat)
 
 postVIF_dat <- vif_func(preVIF_dat)
@@ -892,11 +961,14 @@ full.dat <- full.dat %>%
   mutate("male"=ifelse(sex_num==0, n, NA)) %>% 
   mutate("female"=ifelse(sex_num==1, n, NA))  
 
+full.dat <- full.dat %>%
+  mutate(point_shape = as.factor(ifelse(sex_num == 1, 21, 24))) %>% 
+  mutate(shape_var = ifelse(point_shape == 21, 21, 24))
 
 p <- ggplot(full.dat) + 
-  geom_histogram(aes(x = male, y = stat(count/40)), bins = 15, na.rm = TRUE, fill = "darkblue", color = "black", alpha = 0.85) +
-  geom_histogram(aes(x = female, y = -1*stat(count/40)), bins = 15, na.rm = TRUE, position = position_nudge(y = 1), fill = "darkred", color = "black", alpha = 0.75)+
-  stat_smooth(aes(x=n, y=sex_num), method=glm, method.args=list(family="binomial"), se=TRUE, color = "darkgreen ", fill = "grey40", size = 2)+
+  geom_histogram(aes(x = male, y = stat(count/40)), bins = 15, na.rm = TRUE, fill = "blue3", color = "black", alpha = 0.9) +
+  geom_histogram(aes(x = female, y = -1*stat(count/40)), bins = 15, na.rm = TRUE, position = position_nudge(y = 1), fill = "red3", color = "black", alpha = 0.9)+
+  stat_smooth(aes(x=n, y=sex_num), method=glm, method.args=list(family="binomial"), se=TRUE, color = "black", fill = "grey40", size = 2)+
   geom_point(aes(x=n, y=sex_num, size = fork_length, shape = Sex), show.legend = FALSE)+#, color = sex_num) + 
   scale_size_continuous(range = c(1.5, 4))+
   #scale_color_manual(values = c(0 = "darkblue", 1 = "darkred"), )+
@@ -910,6 +982,9 @@ p <- ggplot(full.dat) +
   annotate("text", x = 0.11, y = 0.76, label = "Female", size = 6)+
   theme_cowplot()
 p
+
+
+
 
 ggsave(plot= p,
        filename = "Posterior Dorsal Height model 3.jpeg",
@@ -1022,11 +1097,11 @@ p1 <- ggplot(full.dat, aes(x = posterior_dorsal_height_FL_n, y = sex_num, color 
   #geom_line()+
   #geom_smooth()+
   theme_classic()+
-  theme(axis.title.y = element_blank(), 
+  theme(#axis.title.y = element_blank(), 
         #axis.ticks.y = element_blank(), 
         #axis.text.y = element_blank(),
         legend.position = "none")+
-  labs(x="Posterior Dorsal Height (N)")
+  labs(x="Posterior Dorsal Height (N)", y = "Sex (Male = 0, Female = 1)")
 p1
 
 #ggsave(plot= p1,
@@ -1065,8 +1140,8 @@ p2 <- ggplot(full.dat, aes(x = dorsal_fin_base_length_FL_l, y = sex_num, color =
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         #legend.position = c(0.12, 0.33),
         legend.position = "none")+
   labs(x="Dorsal Fin Base Length (L)")
@@ -1108,11 +1183,11 @@ p3 <- ggplot(full.dat, aes(x = postorbital_length_FL_c, y = sex_num, color = Sex
   #geom_line()+
   #geom_smooth()+
   theme_classic()+
-  theme(axis.title.y = element_blank(), 
+  theme(#axis.title.y = element_blank(), 
         #axis.ticks.y = element_blank(), 
         #axis.text.y = element_blank(),
         legend.position = c(0.80, 0.71))+
-  labs(x="Post-Orbital Length (C)")
+  labs(x="Post-Orbital Length (C)", y = "Sex (Male = 0, Female = 1)")
 p3
 
 ggsave(plot= p3,
@@ -1154,8 +1229,8 @@ p4 <- ggplot(full.dat, aes(x = anal_fin_height_FL_p, y = sex_num, color = Sex)) 
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         legend.position = "none")+
   labs(x="Anal Fin Height (P)")
 p4
@@ -1196,8 +1271,8 @@ p5 <- ggplot(full.dat, aes(x = postdorsal_length_FL_h, y = sex_num, color = Sex)
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         legend.position = "none")+
   labs(x="Post-Dorsal Length (H)")
 p5
@@ -1236,11 +1311,11 @@ p6 <- ggplot(full.dat, aes(x = pelvic_fin_length_FL_r, y = sex_num, color = Sex)
   #geom_line()+
   #geom_smooth()+
   theme_classic()+
-  theme(axis.title.y = element_blank(), 
+  theme(#axis.title.y = element_blank(), 
         #axis.ticks.y = element_blank(), 
         #axis.text.y = element_blank(),
         legend.position = "none")+
-  labs(x="Pelvic Fin Length (R)")
+  labs(x="Pelvic Fin Length (R)", y = "Sex (Male = 0, Female = 1)")
 p6
 
 ggsave(plot= p6,
@@ -1282,8 +1357,8 @@ p7 <- ggplot(full.dat, aes(x = dorsal_to_adipose_FL_u, y = sex_num, color = Sex)
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         legend.position = "none")+
   labs(x="Dorsal To Adipose Length (U)")
 p7
@@ -1324,8 +1399,8 @@ p8 <- ggplot(full.dat, aes(x = pectoral_fin_length_FL_q, y = sex_num, color = Se
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         legend.position = "none")+
   labs(x="Pectoral Fin Length (Q)")
 p8
@@ -1366,8 +1441,8 @@ p9 <- ggplot(full.dat, aes(x = head_length_FL_d, y = sex_num, color = Sex)) +
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         legend.position = "none")+
   labs(x="Head Length (D)")
 p9
@@ -1393,8 +1468,8 @@ p10 <- ggplot(full.dat, aes(x = pelvic.anal_distance_FL_j, y = sex_num, color = 
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         legend.position = "none")+
   labs(x="Pelvic to Anal Fin Distance (J)")
 p10
@@ -1413,8 +1488,8 @@ p11 <- ggplot(full.dat, aes(x = horizontal_eye_diameter_FL_a, y = sex_num, color
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         legend.position = "none")+
   labs(x="Horizontal Eye Diameter (A)")
 p11
@@ -1433,8 +1508,8 @@ p12 <- ggplot(full.dat, aes(x = maximum_body_depth_FL_e, y = sex_num, color = Se
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         legend.position = "none")+
   labs(x="Maximum Body Depth (E)")
 p12
@@ -1470,8 +1545,8 @@ p13 <- ggplot(full.dat, aes(x = o, y = sex_num, color = Sex)) +
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         legend.position = "none")+
   labs(x="Anal Fin Base Length (O)")
 p13
@@ -1505,8 +1580,8 @@ p14 <- ggplot(full.dat, aes(x = s, y = sex_num, color = Sex)) +
   #geom_smooth()+
   theme_classic()+
   theme(axis.title.y = element_blank(), 
-        #axis.ticks.y = element_blank(), 
-        #axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
         legend.position = "none")+
   labs(x="Adipose Fin Base Length (S)")
 p14
