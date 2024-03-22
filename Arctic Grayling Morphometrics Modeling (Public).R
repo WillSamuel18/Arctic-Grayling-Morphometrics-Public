@@ -5,7 +5,7 @@
 ################################################################################
 
 
-#If you only want to use this code to predict fish sex, that begins on line 1309
+#If you only want to use this code to predict fish sex, that begins on line 1697
 
 
 
@@ -378,8 +378,7 @@ str(preVIF_dat)
 postVIF_dat <- vif_func(preVIF_dat)
 postVIF_dat
 #Removed
-#predorsal_length_FL_g              VIF = 13.87755     
-#preanal_length_FL_k                VIF = 11.00398       
+#preanal_length_FL_k                VIF = 13.4058     
 
 
 
@@ -390,29 +389,19 @@ postVIF_dat
 # Constructing the Models --------------------------------------------------
 
 
-colnames(full.dat)[apply(full.dat, 2, anyNA)]
-#NA values in Adipose measurements (not that important) and Anal Fin Base Length, since a tag was covering it. That will prevent that from being included in the dredge model, so maybe just set it to the mean of similar fish???
-
-#Replace NAs with the mean of the parameter
-full.dat <- full.dat %>% 
-  mutate(s = ifelse(is.na(s), mean(s, na.rm = TRUE), s)) %>% 
-  mutate(o = ifelse(is.na(o), mean(o, na.rm = TRUE), o)) %>% 
-  mutate(t = ifelse(is.na(t), mean(t, na.rm = TRUE), t)) 
-
-
 
 #Final Global Model (without colinear predictors, g and K)
-m.global <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
+m.global <- glm(sex_num ~ a+b+c+d+e+g+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
 summary(m.global)         
 
 nagelkerke(m.global)
 accuracy(list(m.global))
-#Pseudo.R.squared                   With NA     NA -> mean
-#McFadden                            0.794        0.438
-#Cox and Snell (ML)                  0.796        0.454
-#Nagelkerke (Cragg and Uhler)        0.920        0.606
-#Efron.r.squared                     0.782        0.541
-
+#Pseudo.R.squared                   With NA     NA -> mean +/- 2SD
+#McFadden                            0.794        0.459
+#Cox and Snell (ML)                  0.796        0.469
+#Nagelkerke (Cragg and Uhler)        0.920        0.627
+#Efron.r.squared                     0.782        0.549
+(0.459+0.469+0.627+0.549)/4 #0.526
 
 
 options(na.action = "na.fail")
@@ -431,11 +420,11 @@ summary(m.dredge)
 nagelkerke(m.dredge)
 accuracy(list(m.dredge))
 #Pseudo.R.squared                   With NA     NA -> mean
-#McFadden                            0.        0.355
-#Cox and Snell (ML)                  0.        0.388
-#Nagelkerke (Cragg and Uhler)        0.        0.518
-#Efron.r.squared                     0.        0.483
-
+#McFadden                            0.        0.356
+#Cox and Snell (ML)                  0.        0.389
+#Nagelkerke (Cragg and Uhler)        0.        0.519
+#Efron.r.squared                     0.        0.467
+(0.356+0.389+0.519+0.467)/4 #0.433
 
 
 
@@ -447,26 +436,26 @@ nagelkerke(m.fins.only)
 accuracy(list(m.fins.only))
 #Pseudo.R.squared                   With NA     NA -> mean
 #McFadden                            0.664        0.323
-#Cox and Snell (ML)                  0.735        0.360
+#Cox and Snell (ML)                  0.735        0.359
 #Nagelkerke (Cragg and Uhler)        0.850        0.480
-#Efron.r.squared                     0.586        0.467
-
+#Efron.r.squared                     0.586        0.453
+(0.323+0.359+0.480+0.453)/4 #0.404
 
 
 
 #just dorsal fin metrics
-m.dorsal.all <- glm(sex_num ~ h+l+m+n#predorsal_length_FL_g+dorsal_to_adipose_FL_v
+m.dorsal.all <- glm(sex_num ~ g+h+l+m+n#predorsal_length_FL_g+dorsal_to_adipose_FL_v
                     , data = full.dat, family = "binomial")
 summary(m.dorsal.all)
 
 nagelkerke(m.dorsal.all)
 accuracy(list(m.dorsal.all))
 #Pseudo.R.squared                   With NA     NA -> mean
-#McFadden                            0.272        0.272
-#Cox and Snell (ML)                  0.317        0.314
-#Nagelkerke (Cragg and Uhler)        0.419        0.419
-#Efron.r.squared                     0.393        0.394
-
+#McFadden                            0.272        0.274
+#Cox and Snell (ML)                  0.317        0.315
+#Nagelkerke (Cragg and Uhler)        0.419        0.421
+#Efron.r.squared                     0.393        0.395
+(0.274+0.315+0.421+0.395)/4 #0.351
 
 
 #just dorsal fin LENGTH
@@ -481,7 +470,7 @@ accuracy(list(m.dorsal.length))
 #Cox and Snell (ML)                  0.236        0.309
 #Nagelkerke (Cragg and Uhler)        0.315        0.412
 #Efron.r.squared                     0.286        0.391
-
+(0.267+0.308+0.412+0.391)/4 #0.3445
 
 
 
@@ -491,17 +480,17 @@ grayling_dat_250 <- full.dat %>%
 str(grayling_dat_250)
 summary(grayling_dat_250$fork_measured)
 
-m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_250, family = "binomial")
+m.250 <- glm(sex_num ~ a+b+c+d+e+f+g+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_250, family = "binomial")
 summary(m.250)
 
 nagelkerke(m.250)
 accuracy(list(m.250))
 #Pseudo.R.squared
 #McFadden                            1.00
-#Cox and Snell (ML)                  0.750
+#Cox and Snell (ML)                  0.749
 #Nagelkerke (Cragg and Uhler)        1.00
 #Efron.r.squared                     1.00 
-
+(3+0.749)/4 #0.937
 
 
 #what about just with fish over 300mm?
@@ -510,16 +499,17 @@ grayling_dat_300 <- full.dat %>%
 str(grayling_dat_300)
 summary(grayling_dat_300$fork_measured)
 
-m.300 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_300, family = "binomial")
+m.300 <- glm(sex_num ~ a+b+c+d+e+f+g+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_300, family = "binomial")
 summary(m.300)
 
 nagelkerke(m.300)
 accuracy(list(m.300))
 #Pseudo.R.squared
 #McFadden                            1.00
-#Cox and Snell (ML)                  0.750
+#Cox and Snell (ML)                  0.749
 #Nagelkerke (Cragg and Uhler)        1.00
 #Efron.r.squared                     1.00 
+(3+0.749)/4 #0.937
 
 
 
@@ -740,26 +730,43 @@ model.data %>%
 
 
 full.dat <- read.csv("full.dat.final.csv")  #97 obs
-
 #Rotate through these two filter to test with diffeent minimum length thresholds
-#full.dat <- full.dat %>% filter(fork_length >249) #79 obs
+full.dat <- full.dat %>% filter(fork_length >249) #79 obs
 #full.dat <- full.dat %>% filter(fork_length >299)  #66 obs
 
 
-colnames(full.dat)[apply(full.dat, 2, anyNA)]
+#Very low correlation between fork length and these missing parameters, so we will just replace them with randomly assigned missing values:
 
+set.seed(123)
 
-#Replace NAs with the mean of the parameter
-full.dat <- full.dat %>% 
-  mutate(s = ifelse(is.na(s), mean(s, na.rm = TRUE), s)) %>% 
-  mutate(o = ifelse(is.na(o), mean(o, na.rm = TRUE), o)) %>% 
-  mutate(t = ifelse(is.na(t), mean(t, na.rm = TRUE), t)) 
+# Loop through each column and replace missing values with random numbers from a normal distribution
+for (column_name in colnames(full.dat)) {
+  # Get the column as a vector
+  column_vector <- full.dat[[column_name]]
+  
+  # Identify missing values
+  missing_values <- is.na(column_vector)
+  
+  # Calculate the mean and standard deviation of the non-missing values
+  mean_non_missing <- mean(column_vector[!missing_values], na.rm = TRUE)
+  sd_non_missing <- sd(column_vector[!missing_values], na.rm = TRUE)
+  
+  # Generate random numbers from a normal distribution with the same mean and standard deviation
+  random_numbers <- rnorm(sum(missing_values), mean = mean_non_missing, sd = sd_non_missing * 2)
+  
+  # Replace missing values with random numbers
+  column_vector[missing_values] <- random_numbers
+  
+  # Assign the updated column back to the dataset
+  full.dat[[column_name]] <- column_vector
+}
+
 
 
 
 global_pred <- vector()
 
-for(i in 1:97){
+for(i in 1:79){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
   m.global <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
@@ -773,7 +780,7 @@ for(i in 1:97){
 
 dredge_pred <- vector()
 
-for(i in 1:97){
+for(i in 1:79){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
   m.dredge <- glm(sex_num ~ a+e+j+q+r+s+u+n, data = training.dat, family = "binomial")
@@ -785,7 +792,7 @@ for(i in 1:97){
 
 fins_only_pred <- vector()
 
-for(i in 1:97){
+for(i in 1:79){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
   um.fins.only <- glm(sex_num ~ l+m+n+o+p+q+r+s+t+u, data = full.dat, family = "binomial")
@@ -796,7 +803,7 @@ for(i in 1:97){
 
 dorsal_all_pred <- vector()
 
-for(i in 1:97){
+for(i in 1:79){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
   m.dorsal.all <- glm(sex_num ~ h+l+m+n #g+v
@@ -808,7 +815,7 @@ for(i in 1:97){
 
 dorsal_length_pred <- vector()
 
-for(i in 1:97){
+for(i in 1:79){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
   m.dorsal.length <- glm(sex_num ~ n
@@ -825,7 +832,7 @@ grayling_dat_250 <- full.dat %>%
 
 M250_pred <- vector()
 
-for(i in 1:97){
+for(i in 1:79){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
   m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_250, family = "binomial")
@@ -842,7 +849,7 @@ grayling_dat_300 <- full.dat %>%
 
 M300_pred <- vector()
 
-for(i in 1:97){
+for(i in 1:79){
   validate.dat <- full.dat[i,] #Single out one value
   training.dat <- full.dat[-i,] #Use the training data using the data -i
   m.300 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_300, family = "binomial")
@@ -914,14 +921,14 @@ print(cbind(percent_global, percent_dredge, percent_fins, percent_dorsal_all, pe
 
 #Full.dat
 #percent_global percent_dredge percent_fins percent_dorsal_all 
-15.464          20.61856         16.49485        15.46392           
+13.402          22.68         17.52        15.46           
 #percent_dorsal_length  percent_M250     percent_M300
-18.5567                      6.19           12.37113
+18.556                      6.18           10.309
 
 
 #Fish >250
 #percent_global percent_dredge percent_fins percent_dorsal_all 
-0                   15.18987      12.65823       15.18987              
+0                   15.18987      16.455       15.18987              
 #percent_dorsal_length  percent_M250   percent_M300
 15.18987                 0              7.594937
 
@@ -929,7 +936,7 @@ print(cbind(percent_global, percent_dredge, percent_fins, percent_dorsal_all, pe
 
 #Fish >300
 #percent_global percent_dredge  percent_fins  #percent_dorsal_all
-0                  13.63636            6.060606          10.60606               
+0                  13.63636            15.15          10.60606               
 #percent_dorsal_length   percent_M250      percent_M300
     10.60606                    0               0
 
@@ -941,6 +948,7 @@ print(cbind(percent_global, percent_dredge, percent_fins, percent_dorsal_all, pe
 
 # Plotting results --------------------------------------------------------
 
+full.dat <- read.csv("full.dat.final.csv")
 
 
 
@@ -966,11 +974,11 @@ full.dat <- full.dat %>%
   mutate(shape_var = ifelse(point_shape == 21, 21, 24))
 
 p <- ggplot(full.dat) + 
-  geom_histogram(aes(x = male, y = stat(count/40)), bins = 15, na.rm = TRUE, fill = "blue3", color = "black", alpha = 0.9) +
-  geom_histogram(aes(x = female, y = -1*stat(count/40)), bins = 15, na.rm = TRUE, position = position_nudge(y = 1), fill = "red3", color = "black", alpha = 0.9)+
-  stat_smooth(aes(x=n, y=sex_num), method=glm, method.args=list(family="binomial"), se=TRUE, color = "black", fill = "grey40", size = 2)+
-  geom_point(aes(x=n, y=sex_num, size = fork_length, shape = Sex), show.legend = FALSE)+#, color = sex_num) + 
-  scale_size_continuous(range = c(1.5, 4))+
+  geom_histogram(aes(x = male, y = stat(count/40)), bins = 15, na.rm = TRUE, fill = "blue4", color = "black", alpha = 0.75) +
+  geom_histogram(aes(x = female, y = -1*stat(count/40)), bins = 15, na.rm = TRUE, position = position_nudge(y = 1), fill = "red4", color = "black", alpha = 0.75)+
+  stat_smooth(aes(x=n, y=sex_num), method=glm, method.args=list(family="binomial"), se=TRUE, color = "darkgreen", fill = "grey40", size = 2)+
+  geom_point(aes(x=n, y=sex_num, size = fork_length, shape = Sex), pch = 21, fill = "lightblue", color = "black", stroke = 1.1, show.legend = FALSE)+#, color = sex_num) + 
+  scale_size_continuous(range = c(2, 7))+
   #scale_color_manual(values = c(0 = "darkblue", 1 = "darkred"), )+
   theme(axis.title.y = element_blank(), 
         axis.ticks.y = element_blank(), 
@@ -986,12 +994,28 @@ p
 
 
 
+
+
+
 ggsave(plot= p,
        filename = "Posterior Dorsal Height model 3.jpeg",
-       dpi = 2000, 
+       dpi = 300, 
        height = 5,
        width = 5.5,
        units = "in")
+
+
+
+ggsave(plot= p,
+       filename = "Figure 3.tiff",
+       dpi = 300, 
+       height = 5,
+       width = 5.5,
+       units = "in")
+
+
+
+
 
 
 
@@ -1018,7 +1042,7 @@ p_density
 
 ggsave(plot= p_density,
        filename = "Posterior Dorsal Height w/ Density.jpeg",
-       dpi = 2000, 
+       dpi = 300, 
        height = 5,
        width = 5.5,
        units = "in")
@@ -1087,7 +1111,7 @@ accuracy(list(n))
 
 
 p1 <- ggplot(full.dat, aes(x = posterior_dorsal_height_FL_n, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1101,7 +1125,7 @@ p1 <- ggplot(full.dat, aes(x = posterior_dorsal_height_FL_n, y = sex_num, color 
         #axis.ticks.y = element_blank(), 
         #axis.text.y = element_blank(),
         legend.position = "none")+
-  labs(x="Posterior Dorsal Height (N)", y = "Sex (Male = 0, Female = 1)")
+  labs(x="Posterior Dorsal Height (N)", y = "Probability of Being Female")
 p1
 
 #ggsave(plot= p1,
@@ -1129,7 +1153,7 @@ accuracy(list(l))
 
 
 p2 <- ggplot(full.dat, aes(x = dorsal_fin_base_length_FL_l, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1173,7 +1197,7 @@ accuracy(list(c))
 
 
 p3 <- ggplot(full.dat, aes(x = postorbital_length_FL_c, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1187,7 +1211,7 @@ p3 <- ggplot(full.dat, aes(x = postorbital_length_FL_c, y = sex_num, color = Sex
         #axis.ticks.y = element_blank(), 
         #axis.text.y = element_blank(),
         legend.position = c(0.80, 0.71))+
-  labs(x="Post-Orbital Length (C)", y = "Sex (Male = 0, Female = 1)")
+  labs(x="Post-Orbital Length (C)", y = "Probability of Being Female")
 p3
 
 ggsave(plot= p3,
@@ -1218,7 +1242,7 @@ accuracy(list(p))
 
 
 p4 <- ggplot(full.dat, aes(x = anal_fin_height_FL_p, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1260,7 +1284,7 @@ accuracy(list(h))
 #MEAN   0.035
 
 p5 <- ggplot(full.dat, aes(x = postdorsal_length_FL_h, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1301,7 +1325,7 @@ accuracy(list(r))
 #MEAN   0.0145
 
 p6 <- ggplot(full.dat, aes(x = pelvic_fin_length_FL_r, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1315,7 +1339,7 @@ p6 <- ggplot(full.dat, aes(x = pelvic_fin_length_FL_r, y = sex_num, color = Sex)
         #axis.ticks.y = element_blank(), 
         #axis.text.y = element_blank(),
         legend.position = "none")+
-  labs(x="Pelvic Fin Length (R)", y = "Sex (Male = 0, Female = 1)")
+  labs(x="Pelvic Fin Length (R)", y = "Probability of Being Female")
 p6
 
 ggsave(plot= p6,
@@ -1346,7 +1370,7 @@ accuracy(list(u))
 
 
 p7 <- ggplot(full.dat, aes(x = dorsal_to_adipose_FL_u, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1388,7 +1412,7 @@ accuracy(list(q))
 #MEAN   0.153
 
 p8 <- ggplot(full.dat, aes(x = pectoral_fin_length_FL_q, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1430,7 +1454,7 @@ accuracy(list(d))
 #MEAN   0.0887
 
 p9 <- ggplot(full.dat, aes(x = head_length_FL_d, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1457,7 +1481,7 @@ ggsave(plot= p9,
 
 
 p10 <- ggplot(full.dat, aes(x = pelvic.anal_distance_FL_j, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1477,7 +1501,7 @@ p10
 
 
 p11 <- ggplot(full.dat, aes(x = horizontal_eye_diameter_FL_a, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1534,7 +1558,7 @@ accuracy(list(o))
 #MEAN   0.0375
 
 p13 <- ggplot(full.dat, aes(x = o, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1569,7 +1593,7 @@ accuracy(list(s))
 
 
 p14 <- ggplot(full.dat, aes(x = s, y = sex_num, color = Sex)) +
-  geom_point(aes(shape = Sex), size = 3) +
+  geom_point(aes(shape = Sex), size = 2.5, alpha = 0.7) +
   #geom_line(aes(y=model))+
   #geom_line(aes(y = .fitted), color = "blue") +
   stat_smooth(method="glm", color="darkgreen", se=TRUE, 
@@ -1593,7 +1617,7 @@ panel
 
 ggsave(plot= panel,
        filename = "R_Figures/panel final.jpeg",
-       dpi = 1500, 
+       dpi = 500, 
        height = 8,
        width = 8,
        units = "in")
@@ -1606,7 +1630,7 @@ panel
 
 ggsave(plot= panel,
        filename = "C:/Users/npwil/OneDrive/Desktop/School/Grad School/Side Quests/Grayling morphometrics project/Arctic-Grayling-Morphometrics-Public/panel final FOR MANUSCRIPT.jpeg",
-       dpi = 1500, 
+       dpi = 500, 
        height = 8,
        width = 8,
        units = "in")
@@ -1619,7 +1643,7 @@ panel
 
 ggsave(plot= panel,
        filename = "R_Figures/panel 2.jpeg",
-       dpi = 1500, 
+       dpi = 500, 
        height = 6,
        width = 9,
        units = "in")
@@ -1678,41 +1702,67 @@ fig1
 grayling_dat_250 <- full.dat %>% 
   filter(fork_length >249)
 str(grayling_dat_250)
-summary(grayling_dat_250$fork_measured)
+summary(grayling_dat_250$fork_length)
 
+#Full model
 m.250 <- glm(sex_num ~ a+b+c+d+e+f+h+i+j+l+m+n+o+p+q+r+s+t+u, data = grayling_dat_250, family = "binomial")
 summary(m.250)
 
 
-
 #just dorsal fin LENGTH (Posterior Dorsal Height)
-m.dorsal.length <- glm(sex_num ~ n, data = full.dat, family = "binomial")
+m.dorsal.length <- glm(sex_num ~ n, data = grayling_dat_250, family = "binomial")
 
 
 
-###Create your dataset like this (all these measurements are standardized by fork length):
-str(full.dat[,c(5,62:83)])
+###Create your dataset to look like this (all these measurements are standardized/divided by fork length):
+str(full.dat[,c(5,62:82)])
 #(you'll want to name each parameter by just the letter (e.g., "a", "b", "c"...),
-#I included the full name in the column headings )
+#I included the full name in the column headings for demonstration purposes)
 
 
 
 
 #predict with the m.250 model
-sex_pred_250 <- predict(m.250, newdata = full.dat, type = "response")
+sex_pred_250 <- predict(m.250, newdata = grayling_dat_250, type = "response")
 #1 = female, 0 = male
 
 #Here is your prediction!
 sex_pred_250
 
 #Join it to the dataset so you can tell which fish is which. That's it!
-precition.dat <- cbind(sex_pred_250, full.dat)
+precition.dat <- cbind(sex_pred_250, grayling_dat_250)
 
 
 
-#repeat with the dorsal_length model (if desired)
-sex_pred_dorsal <- predict(m.dorsal.length, newdata = full.dat, type = "response")
+#Repeat with the dorsal_length model (if desired)
+sex_pred_dorsal <- predict(m.dorsal.length, newdata = grayling_dat_250, type = "response")
 #1 = female, 0 = male
+as.vector(sex_pred_dorsal) #this is the probability of each fish being a female (Female = 1)
 
-precition.dat <- cbind(sex_pred_dorsal, precition.dat) 
+#If you want you can classify each fish based on its probability:
+sex_pred_dorsal <- data.frame(sex_pred_dorsal) %>% 
+  mutate(Sex = ifelse(sex_pred_dorsal > 0.5, "F", "M"))
+sex_pred_dorsal
+
+#precition.dat <- cbind(sex_pred_dorsal, precition.dat) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
